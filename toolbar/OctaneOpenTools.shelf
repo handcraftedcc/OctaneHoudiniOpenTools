@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="octaneOpenTools" label="Octane Open Tools">
+    <memberTool name="Importers"/>
+    <memberTool name="cargoOctaneListener"/>
+    <memberTool name="displacementManager"/>
+  </toolshelf>
+
+  <tool name="cargoOctaneListener" label="Cargo Listener" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import os
+import sys
+
+scripts_path = os.path.join(os.environ.get("OCTANEHOUDINIOPENTOOLS", ""), "scripts", "python")
+if scripts_path and scripts_path not in sys.path:
+    sys.path.append(scripts_path)
+
+import CargoOctanePanel
+CargoOctanePanel.show()]]></script>
+  </tool>
+
+  <tool name="displacementManager" label="Displacement Manager" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import importlib
+import os
+import sys
+import hou
+
+scripts_path = os.path.join(os.environ.get("OCTANEHOUDINIOPENTOOLS", ""), "scripts", "python")
+if scripts_path and scripts_path not in sys.path:
+    sys.path.append(scripts_path)
+
+import DisplacementManager
+importlib.reload(DisplacementManager)
+
+kwargs = {}
+
+selected = hou.selectedNodes()
+if selected:
+    kwargs["nodes"] = selected
+
+DisplacementManager.main(kwargs)]]></script>
+  </tool>
+
+  <tool name="Importers" label="Importers" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import importlib
+import os
+import sys
+import hou
+
+scripts_path = os.path.join(os.environ.get("OCTANEHOUDINIOPENTOOLS", ""), "scripts", "python")
+if scripts_path and scripts_path not in sys.path:
+    sys.path.append(scripts_path)
+
+import Importers
+importlib.reload(Importers)
+import openToolsUtils
+importlib.reload(openToolsUtils)
+import openToolsMaterialUtils
+importlib.reload(openToolsMaterialUtils)
+
+
+Importers.main({})]]></script>
+  </tool>
+</shelfDocument>

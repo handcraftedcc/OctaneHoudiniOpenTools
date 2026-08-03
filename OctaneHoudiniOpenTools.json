@@ -1,0 +1,9 @@
+{
+    "enable": true,
+    "env": [
+        {
+            "OCTANEHOUDINIOPENTOOLS": "PATH/TO/OctaneHoudiniOpenTools"
+        }
+    ],
+    "hpath": "$OCTANEHOUDINIOPENTOOLS"
+}
