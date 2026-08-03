@@ -11,7 +11,7 @@
     <memberTool name="displacementManager"/>
   </toolshelf>
 
-  <tool name="cargoOctaneListener" label="Cargo Listener" icon="PLASMA_App">
+  <tool name="cargoOctaneListener" label="Cargo Listener" icon="hicon:/SVGIcons.index?COMMON_import.svg">
     <script scriptType="python"><![CDATA[import os
 import sys
 
@@ -23,7 +23,7 @@ import CargoOctanePanel
 CargoOctanePanel.show()]]></script>
   </tool>
 
-  <tool name="displacementManager" label="Displacement Manager" icon="PLASMA_App">
+  <tool name="displacementManager" label="Displacement Manager" icon="hicon:/SVGIcons.index?COP2_sopimport.svg">
     <script scriptType="python"><![CDATA[import importlib
 import os
 import sys
@@ -45,7 +45,7 @@ if selected:
 DisplacementManager.main(kwargs)]]></script>
   </tool>
 
-  <tool name="Importers" label="Importers" icon="PLASMA_App">
+  <tool name="Importers" label="Importers" icon="hicon:/SVGIcons.index?BUTTONS_selection_import.svg">
     <script scriptType="python"><![CDATA[import importlib
 import os
 import sys
