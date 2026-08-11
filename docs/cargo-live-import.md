@@ -1,5 +1,11 @@
 # Cargo Live Import
 
+> **Important:** Disable Cargo's official Houdini package JSON before using
+> this listener. Rename `kitbash3d-cargo-houdini.json` to something Houdini
+> will not load, such as `kitbash3d-cargo-houdini.jsonx`. If the official Cargo
+> listener is still enabled, Cargo live import will not work correctly because
+> both plugins try to use the same Houdini port.
+
 Use the **Cargo Listener** button on the **Octane Open Tools** shelf to open
 the listener control panel.
 

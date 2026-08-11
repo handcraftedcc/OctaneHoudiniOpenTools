@@ -27,6 +27,11 @@ IMPORTERS = [
         "description": "Browse and import Megascans materials and assets.",
     },
     {
+        "label": "GLTF",
+        "module": "GltfImporter",
+        "description": "Import GLTF models and rebuild their materials for Octane.",
+    },
+    {
         "label": "PlantFactory",
         "module": "PlantCatalogImporter",
         "description": "Import PlantFactory FBX assets and build Octane materials.",

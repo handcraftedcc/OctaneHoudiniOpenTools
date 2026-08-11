@@ -25,6 +25,8 @@ OCTANE_TRANSFORM_3D_NODE_TYPE = "octane::NT_TRANSFORM_3D"
 OCTANE_TEXTURE_DISPLACEMENT_NODE_TYPE = "octane::NT_DISPLACEMENT"
 OCTANE_VERTEX_DISPLACEMENT_NODE_TYPE = "octane::NT_VERTEX_DISPLACEMENT"
 OCTANE_TRIPLANAR_TEXTURE_NODE_TYPE = "octane::NT_TEX_TRIPLANAR"
+OCTANE_RGB_TEXTURE_NODE_TYPE = "octane::NT_TEX_RGB"
+OCTANE_MULTIPLY_TEXTURE_NODE_TYPE = "octane::NT_TEX_MULTIPLY"
 
 COLOR_SPACE_SRGB = "NAMED_COLOR_SPACE_SRGB"
 COLOR_SPACE_NON_COLOR = "NAMED_COLOR_SPACE_OTHER"
@@ -455,6 +457,47 @@ def createTriplanarTextureNode(subnet, image_node, transform_3d_node, channel, p
     return node
 
 
+def createTextureFactorNode(subnet, texture_node, factor, channel):
+    """Multiply a texture by a scalar or RGB factor and return the output node."""
+    if isinstance(factor, (int, float)):
+        factor = (float(factor),) * 3
+    elif isinstance(factor, (list, tuple)):
+        factor = tuple(float(value) for value in factor[:3])
+    else:
+        return texture_node
+    if len(factor) != 3 or factor == (1.0, 1.0, 1.0):
+        return texture_node
+
+    rgb_node = createNode(
+        subnet,
+        [OCTANE_RGB_TEXTURE_NODE_TYPE],
+        "{0}_factor".format(sanitizeNodeName(channel)),
+    )
+    setColorOrFloatParm(rgb_node, ["A_VALUE", "value", "color"], factor)
+    rgb_node.setPosition(texture_node.position() + hou.Vector2(-1, -2))
+
+    multiply_node = createNode(
+        subnet,
+        [OCTANE_MULTIPLY_TEXTURE_NODE_TYPE],
+        "{0}_multiply".format(sanitizeNodeName(channel)),
+    )
+    multiply_node.setPosition(texture_node.position() + hou.Vector2(1, -2))
+    first = connectToFirstNamedInput(
+        multiply_node, texture_node, ["texture1", "input1", "texture"]
+    )
+    second = connectToFirstNamedInput(
+        multiply_node, rgb_node, ["texture2", "input2", "factor"]
+    )
+    try:
+        if first is None:
+            multiply_node.setInput(0, texture_node)
+        if second is None:
+            multiply_node.setInput(1, rgb_node)
+    except Exception:
+        pass
+    return multiply_node
+
+
 def normalizeProjectionSettings(projection):
     if isinstance(projection, dict):
         settings = dict(projection)
@@ -600,6 +643,11 @@ def createTextureNodes(subnet, standard_surface, material_spec, projection_setti
         output_node = image_node
         if projection_mode == PROJECTION_MODE_TRIPLANAR:
             output_node = createTriplanarTextureNode(subnet, image_node, transform_3d_node, channel, projection_settings)
+
+        if "factor" in texture:
+            output_node = createTextureFactorNode(
+                subnet, output_node, texture["factor"], channel
+            )
 
         if isHeightChannel(channel):
             connectHeightTexture(standard_surface, subnet, output_node, displacement_settings, created_nodes)
