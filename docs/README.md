@@ -8,6 +8,7 @@ This folder documents shared APIs intended for importer and shelf-tool code.
 - [Material API](material-api.md): unified Octane material, texture, projection, and displacement creation.
 - [Cargo Live Import](cargo-live-import.md): receive Cargo assets directly into Octane `/mat` or `/obj` networks.
 - [Megascans Importer](megascans-importer.md): browse and import preview-backed Megascans materials and assets.
+- [GLTF Importer](gltf-importer.md): import flattened GLTF geometry and rebuild its materials for Octane.
 
 ## Design Rule
 

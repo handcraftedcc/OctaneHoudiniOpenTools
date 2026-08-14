@@ -47,6 +47,7 @@ textures = {
         "texture_type": "image",
         "color_space": "NAMED_COLOR_SPACE_SRGB",
         "power": 1.0,
+        "factor": [0.8, 0.4, 0.2],
         "parameters": {
             "gamma": 1.0
         }
@@ -66,6 +67,10 @@ Supported `texture_type` values:
 - `greyscale` or `grayscale`: float image texture.
 
 If `texture_type` or `color_space` is omitted, the utility infers a reasonable default from the channel name.
+An optional scalar or RGB `factor` creates an Octane Multiply Texture and
+multiplies the imported image by that value before connecting it to the
+material. This is used for formats such as GLTF where texture values are
+modulated by a separate color factor.
 
 ## Parameters
 
