@@ -477,6 +477,7 @@ def select_gltf_file():
     selected = hou.ui.selectFile(
         title="Select GLTF model",
         file_type=hou.fileType.Geometry,
+        pattern="*.gltf *.glb",
         chooser_mode=hou.fileChooserMode.Read,
     )
     if not selected:
