@@ -126,6 +126,8 @@ def _create_direct_sop_asset(parent, folder, manifest, name, column, add_animati
     asset = folder / 'asset.usda'
     read = parent.createNode('usdimport', 'read_' + name)
     read.parm('filepath1').set(asset.as_posix())
+    if read.parm('importtime'):
+        read.parm('importtime').set(1)
     read.parm('primpattern').set('%type:Mesh')
     read.parm('unpack').set(True) if read.parm('unpack') else None
     unpack = parent.createNode('unpackusd', 'unpack_' + name)
@@ -209,6 +211,8 @@ def import_package(folder, create_obj=True, create_stage=None, obj_parent=None, 
                 child.destroy()
             read = geometry.createNode('usdimport', 'read_botaniq_usd')
             read.parm('filepath1').set(asset.as_posix())
+            if read.parm('importtime'):
+                read.parm('importtime').set(1)
             # Import all mesh prims; USD Import expands geometry with its primvars.
             read.parm('primpattern').set('%type:Mesh')
             read.parm('unpack').set(True) if read.parm('unpack') else None
