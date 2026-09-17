@@ -14,6 +14,21 @@ names or paths change.
 This uses `openToolsMaterialUtils.createOctaneMaterial()`, compact texture networks,
 and controls on the parent material network, following the PlantCatalog importer.
 
+## Prerequisites
+
+Install the **engon** Blender extension first, then install your licensed
+**botaniq** `.paq` asset pack through engon. The importer reads the installed
+pack directory; it does not install, activate, or redistribute botaniq content.
+Follow Polygoniq's official [engon installation guide](https://docs.polygoniq.com/engon/1.10.0/getting_started/installation/)
+and [asset-pack installation guide](https://docs.polygoniq.com/engon/1.10.0/getting_started/asset_packs/).
+
+The importer needs Blender 5.2 or later. It first uses a Blender executable
+saved in its settings, then tries Blender on `PATH`, then searches the standard
+Windows Blender installation directory. If it still cannot find Blender, it
+asks you to select `blender.exe` once and remembers that location for later
+imports. A fully cached Botaniq package or collection can be imported without
+opening Blender.
+
 ## Use
 
 1. Open **Importers → botaniq**.
