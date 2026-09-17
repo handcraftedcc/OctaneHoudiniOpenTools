@@ -25,9 +25,11 @@ focused for the official distribution. Both kinds of contribution are welcome.
 
 ## Included Tools
 
-The repository currently includes shared material and settings APIs, import
-utilities, shelf tools, and integrations for services such as Cargo and
-Megascans.
+The repository includes shared material and settings APIs, import utilities,
+shelf tools, and integrations for Cargo, Megascans, GLTF, PlantFactory, and
+botaniq. The botaniq importer creates Houdini-ready packages from a separately
+licensed local botaniq installation; it does not include botaniq models,
+textures, previews, Blender files, or Engon source code.
 
 See the [documentation](docs/README.md) for the available tools and APIs.
 
@@ -56,6 +58,8 @@ Before opening a pull request:
 - Include clear reproduction steps for bug fixes.
 - Keep user-specific paths, credentials, generated files, and private assets
   out of the repository.
+- Do not submit third-party models, textures, previews, source libraries, or
+  generated exports unless their redistribution terms explicitly permit it.
 - Update documentation when behavior or setup changes.
 - Prefer shared utilities over duplicating common node-creation or settings
   logic.

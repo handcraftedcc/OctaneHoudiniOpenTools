@@ -1,7 +1,40 @@
-﻿references
-.idea
-testFiles
-userSettings
-*__pycache__
-info
-workingFiles
+# Per-user Houdini state and local tool settings
+userSettings/
+
+# Third-party source libraries, renders, extracted packages, and diagnostics
+testfiles/
+testFiles/
+references/
+workingFiles/
+backup/
+info/
+*_octane/
+*.botaniq_collection.json
+
+# Houdini working files and automatic backups
+*.hip
+*.hipnc
+*.hiplc
+*.hip~
+*.blend1
+*.blend2
+*.blend@
+
+# Logs and transient output
+*.log
+*.tmp
+
+# Python and editor state
+__pycache__/
+*.py[cod]
+.idea/
+.vscode/
+
+# Local HDA backup history; the current HDA in otls/ is distributable
+otls/backup/
+
+# OS and local-agent files
+.DS_Store
+Thumbs.db
+.codex/
+.agents/

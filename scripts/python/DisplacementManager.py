@@ -206,6 +206,23 @@ def displacement_resolution(displacement_node):
     return resolution_label(value) if value != "" else ""
 
 
+def displacement_quality(displacement_node):
+    if displacement_node.type().name() != TEXTURE_DISPLACEMENT_TYPE:
+        return "N/A"
+
+    parm = displacement_node.parm("quality")
+    if parm is None:
+        return ""
+    try:
+        value = parm.eval()
+        labels = parm.menuLabels()
+        if labels and 0 <= int(value) < len(labels):
+            return labels[int(value)]
+        return str(value)
+    except Exception:
+        return ""
+
+
 def displacement_height(displacement_node):
     return safe_parm_value(displacement_node, "amount", "")
 
@@ -313,8 +330,10 @@ class DisplacementManagerDialog(QtWidgets.QDialog):
         self.displacement_nodes = list(displacement_nodes)
 
         self.table = QtWidgets.QTableWidget(self)
-        self.table.setColumnCount(6)
-        self.table.setHorizontalHeaderLabels(["Enabled", "Material", "Type", "Height", "Resolution", "Node"])
+        self.table.setColumnCount(7)
+        self.table.setHorizontalHeaderLabels(
+            ["Enabled", "Material", "Type", "Height", "Quality", "Resolution", "Node"]
+        )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
@@ -358,6 +377,7 @@ class DisplacementManagerDialog(QtWidgets.QDialog):
                 material_display_name(node),
                 displacement_type_label(node),
                 str(displacement_height(node)),
+                str(displacement_quality(node)),
                 str(displacement_resolution(node)),
                 node.path(),
             ]

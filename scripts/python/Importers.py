@@ -17,6 +17,11 @@ except ImportError:
 
 IMPORTERS = [
     {
+        "label": "botaniq",
+        "module": "BotaniqImporter",
+        "description": "Import botaniq models with USD attributes and simple native Octane textures/materials.",
+    },
+    {
         "label": "Cargo",
         "module": "CargoImporter",
         "description": "Import Cargo USD materials or models.",
