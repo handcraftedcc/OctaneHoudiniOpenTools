@@ -80,14 +80,29 @@ def _log(message):
     print("[Megascans] {0}".format(message))
 
 
-def select_library_directory():
+def select_library_directory(parent=None, start_directory=None):
+    """Choose a library directory, keeping the picker above its importer dialog."""
     if hou is None:
         raise RuntimeError("This script must run inside Houdini.")
-    selected = hou.ui.selectFile(
-        title="Select Megascans library directory",
-        file_type=hou.fileType.Directory,
-        chooser_mode=hou.fileChooserMode.Read,
-    )
+
+    # ``hou.ui.selectFile`` is a top-level Houdini dialog.  When invoked from
+    # the modal browser it is not a child of that browser, so Qt leaves it
+    # visible but prevents it from receiving clicks.  Use a Qt child dialog
+    # whenever the browser is available.
+    if QtWidgets is not None:
+        initial_directory = start_directory or ""
+        selected = QtWidgets.QFileDialog.getExistingDirectory(
+            parent or hou.qt.mainWindow(),
+            "Select Megascans library directory",
+            initial_directory,
+        )
+    else:
+        selected = hou.ui.selectFile(
+            title="Select Megascans library directory",
+            file_type=hou.fileType.Directory,
+            chooser_mode=hou.fileChooserMode.Read,
+            start_directory=start_directory or "",
+        )
     if not selected:
         return None
     return os.path.normpath(hou.expandString(selected))
@@ -422,12 +437,12 @@ def _dialog_exec(dialog):
     return exec_method()
 
 
-def choose_import_preferences(has_assets):
+def choose_import_preferences(has_assets, parent=None):
     if QtWidgets is None:
         raise RuntimeError("PySide is required for the Megascans importer UI.")
 
     preferences = default_preferences()
-    parent = hou.qt.mainWindow() if hou is not None and hasattr(hou, "qt") else None
+    parent = parent or (hou.qt.mainWindow() if hou is not None and hasattr(hou, "qt") else None)
     dialog = QtWidgets.QDialog(parent)
     dialog.setWindowTitle("Megascans Import Preferences")
     dialog.setModal(True)
@@ -1105,7 +1120,7 @@ class MegascansBrowser(QtWidgets.QDialog if QtWidgets is not None else object):
             QtWidgets.QApplication.restoreOverrideCursor()
 
     def _change_library(self):
-        root_directory = select_library_directory()
+        root_directory = select_library_directory(self, self.root_directory)
         if not root_directory:
             return
         self.root_directory = root_directory
@@ -1116,14 +1131,16 @@ class MegascansBrowser(QtWidgets.QDialog if QtWidgets is not None else object):
     def _import_selected(self):
         records = self._selected_records()
         if not records:
-            hou.ui.displayMessage(
+            self._display_message(
                 "Select one or more Megascans materials or assets first.",
                 title="Megascans Importer",
+                icon=QtWidgets.QMessageBox.Warning,
             )
             return
 
         preferences = choose_import_preferences(
-            has_assets=any(record["kind"] == "asset" for record in records)
+            has_assets=any(record["kind"] == "asset" for record in records),
+            parent=self,
         )
         if preferences is None:
             return
@@ -1132,20 +1149,31 @@ class MegascansBrowser(QtWidgets.QDialog if QtWidgets is not None else object):
             result = import_records(records, preferences)
         except Exception as error:
             _log("Import failed: {0}".format(error))
-            hou.ui.displayMessage(
+            self._display_message(
                 "Megascans import failed:\n{0}\n\nSee the Python shell for the quality report.".format(error),
-                severity=hou.severityType.Error,
                 title="Megascans Importer",
+                icon=QtWidgets.QMessageBox.Critical,
             )
             return
 
-        hou.ui.displayMessage(
+        self._display_message(
             "Created {0} item(s); skipped {1}.\n\nSee the Python shell for the full quality report.".format(
                 len(result["created"]),
                 result["skipped"],
             ),
             title="Megascans Importer",
         )
+
+    def _display_message(self, message, title, icon=None):
+        """Show a modal child notification that can receive input."""
+        dialog = QtWidgets.QMessageBox(
+            icon or QtWidgets.QMessageBox.Information,
+            title,
+            message,
+            QtWidgets.QMessageBox.Ok,
+            self,
+        )
+        _dialog_exec(dialog)
 
 
 def show(root_directory=None):

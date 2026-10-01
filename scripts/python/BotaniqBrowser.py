@@ -20,13 +20,27 @@ def _source_key(record):
     return str(_value(record, "source"))
 
 
-def _directory_selection(title, start_directory):
+def _directory_selection(title, start_directory, parent=None):
     import hou
-    selected = hou.ui.selectFile(
-        title=title,
-        file_type=hou.fileType.Directory,
-        start_directory=str(start_directory or ""),
-    )
+    try:
+        from PySide6 import QtWidgets
+    except ImportError:
+        try:
+            from PySide2 import QtWidgets
+        except ImportError:
+            QtWidgets = None
+
+    # A Houdini top-level file chooser cannot receive input while this modal
+    # browser is active.  A Qt child dialog remains interactive.
+    if QtWidgets is not None:
+        selected = QtWidgets.QFileDialog.getExistingDirectory(
+            parent or hou.qt.mainWindow(), title, str(start_directory or ""))
+    else:
+        selected = hou.ui.selectFile(
+            title=title,
+            file_type=hou.fileType.Directory,
+            start_directory=str(start_directory or ""),
+        )
     if not selected:
         return None
     return Path(hou.expandString(selected)).expanduser().resolve()
@@ -231,7 +245,7 @@ def _select_records_thumbnails(root, records, title="Botaniq Assets", single_sel
                 self._recache.setEnabled(True)
 
         def _change_library_root(self):
-            changed = change_library_callback(self.selected_root)
+            changed = change_library_callback(self.selected_root, self)
             if not changed:
                 return
             root, library = changed
@@ -528,9 +542,9 @@ def _choose_root(settings):
     return root.resolve() if root is not None else None
 
 
-def _change_library(start_directory):
+def _change_library(start_directory, parent=None):
     """Choose a different library from the persistent browser header action."""
-    root = _directory_selection('Choose botaniq pack or blends/models folder', start_directory)
+    root = _directory_selection('Choose botaniq pack or blends/models folder', start_directory, parent)
     if root is None:
         return None
     import BotaniqCatalogCache
@@ -585,7 +599,7 @@ def choose_import(settings):
     selection = _select_records_thumbnails(
         root, {'assets': assets, 'collections': collections}, title='Botaniq Browser',
         recache_callback=lambda current_root: BotaniqCatalogCache.load_library(current_root, force=True)[0],
-        change_library_callback=lambda current_root: _change_library(current_root))
+        change_library_callback=lambda current_root, parent: _change_library(current_root, parent))
     if not selection:
         return None
     root, kind, selected = selection
