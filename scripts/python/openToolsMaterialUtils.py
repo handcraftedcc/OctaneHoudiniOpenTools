@@ -569,6 +569,15 @@ def applyMaterialParameters(standard_surface, parameters, allow_unknown_paramete
         setColorOrFloatParm(standard_surface, parm_names, value)
 
 
+def houdiniFilePath(path):
+    """Use Houdini file separators, retaining the leading // of UNC shares.
+
+    Do not expand variables or normalize here: file parameters may contain
+    Houdini expressions such as $HIP and $F4.
+    """
+    return str(path).replace("\\", "/")
+
+
 def setPreviewTexture(subnet, textures):
     texture_map = {}
     if isinstance(textures, dict):
@@ -579,7 +588,7 @@ def setPreviewTexture(subnet, textures):
     if not basecolor:
         return
     setFirstExistingParm(subnet, ["ogl_use_tex1"], 1)
-    setFirstExistingParm(subnet, ["ogl_tex1"], basecolor)
+    setFirstExistingParm(subnet, ["ogl_tex1"], houdiniFilePath(basecolor))
 
 
 def materialHasEmissionEnabled(material_spec):
@@ -630,7 +639,7 @@ def createTextureNodes(subnet, standard_surface, material_spec, projection_setti
         node_name = texture.get("node_name") or sanitizeNodeName(texture.get("name") or channel)
         image_node = createNode(subnet, [textureNodeType(texture)], node_name, logger=logger)
         image_node.setPosition(hou.Vector2(index * 2, -2))
-        setFirstExistingParm(image_node, ["A_FILENAME", "filename", "file"], texture_path)
+        setFirstExistingParm(image_node, ["A_FILENAME", "filename", "file"], houdiniFilePath(texture_path))
         setFirstExistingParm(image_node, ["colorSpace", "colorspace"], colorSpaceForTexture(texture))
         if "power" in texture:
             setFirstExistingParm(image_node, ["power", "A_POWER"], texture["power"])

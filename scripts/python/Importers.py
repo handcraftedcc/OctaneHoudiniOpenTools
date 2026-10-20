@@ -32,6 +32,11 @@ IMPORTERS = [
         "description": "Browse and import Megascans materials and assets.",
     },
     {
+        "label": "USD",
+        "module": "UsdImporter",
+        "description": "Import USD models or materials and rebuild their surfaces for Octane.",
+    },
+    {
         "label": "GLTF",
         "module": "GltfImporter",
         "description": "Import GLTF models and rebuild their materials for Octane.",

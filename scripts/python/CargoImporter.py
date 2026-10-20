@@ -839,7 +839,7 @@ def create_texture_nodes(subnet, standard_surface, material, height_mode, projec
         texture_path = material["textures"][channel]
         image_node = create_node(subnet, [texture_node_type_for_channel(channel)], sanitize_node_name(channel))
         image_node.setPosition(hou.Vector2(index * 2, -2))
-        set_first_existing_parm(image_node, ["A_FILENAME", "filename", "file"], texture_path)
+        set_first_existing_parm(image_node, ["A_FILENAME", "filename", "file"], openToolsMaterialUtils.houdiniFilePath(texture_path))
         set_first_existing_parm(image_node, ["colorSpace", "colorspace"], color_space_for_channel(channel))
         texture_settings = material.get("texture_settings", {}).get(channel, {})
         if "power" in texture_settings:
@@ -877,7 +877,7 @@ def set_preview_texture(subnet, material):
     if not basecolor:
         return
     set_first_existing_parm(subnet, ["ogl_use_tex1"], 1)
-    set_first_existing_parm(subnet, ["ogl_tex1"], basecolor)
+    set_first_existing_parm(subnet, ["ogl_tex1"], openToolsMaterialUtils.houdiniFilePath(basecolor))
 
 
 def create_octane_material(parent, material, height_mode, projection_mode):
@@ -921,7 +921,7 @@ def create_usd_import_column(parent, model_record, material_refs, height_mode, p
     material_node.setPosition(hou.Vector2(position.x(), position.y() - 1.5))
     out_node.setPosition(hou.Vector2(position.x(), position.y() - 3.0))
 
-    set_first_existing_parm(import_node, ["filepath1", "filepath", "file"], model_record["path"])
+    set_first_existing_parm(import_node, ["filepath1", "filepath", "file"], openToolsMaterialUtils.houdiniFilePath(model_record["path"]))
     set_first_existing_parm(import_node, ["input_unpack"], 1)
     set_first_existing_parm(import_node, ["unpack_geomtype"], 1)
 

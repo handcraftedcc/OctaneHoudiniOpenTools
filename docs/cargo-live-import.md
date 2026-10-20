@@ -72,6 +72,12 @@ The listener only adapts Cargo's `usdFilePath` and `textureVariant` message to
 the records consumed by `scripts/python/CargoImporter.py`. Asset parsing and
 Houdini/Octane node creation remain centralized in that importer.
 
+Imported texture, viewport preview, and model file parameters use forward
+slashes, including NAS paths such as `//server/share/cargo/...`. Windows UNC
+paths received from Cargo are converted when assigned to these parameters.
+For nodes created before this fix, reimport the asset or replace backslashes
+with forward slashes in the existing file parameters.
+
 Only one plugin can listen on Cargo's configured Houdini port. Disable or
 remove the KitBash3D Solaris/USD Houdini plugin before enabling this package,
 otherwise the second listener will report that the port is already in use.

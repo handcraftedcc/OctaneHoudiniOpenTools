@@ -471,22 +471,48 @@ def parse_materials(gltf_path):
     return records
 
 
-def select_gltf_file():
+def normalize_gltf_paths(paths):
+    """Expand a path list or Houdini's semicolon-separated file selection."""
+    if isinstance(paths, str):
+        paths = paths.split(";")
+    result = []
+    seen = set()
+    for path in paths or []:
+        if not path or not str(path).strip():
+            continue
+        path = os.path.abspath(os.path.normpath(hou.expandString(str(path).strip())))
+        if os.path.splitext(path)[1].lower() not in GLTF_EXTENSIONS:
+            raise ValueError("Expected a .gltf or .glb file: {0}".format(path))
+        key = os.path.normcase(path)
+        if key not in seen:
+            result.append(path)
+            seen.add(key)
+    return result
+
+
+def select_gltf_files():
     if hou is None:
         raise RuntimeError("This script must run inside Houdini.")
     selected = hou.ui.selectFile(
-        title="Select GLTF model",
+        title="Select GLTF models",
         file_type=hou.fileType.Geometry,
         pattern="*.gltf *.glb",
         chooser_mode=hou.fileChooserMode.Read,
+        multiple_select=True,
     )
     if not selected:
-        return None
-    path = os.path.normpath(hou.expandString(selected))
-    if os.path.splitext(path)[1].lower() not in GLTF_EXTENSIONS:
-        hou.ui.displayMessage("Select a .gltf or .glb file.", title="GLTF Importer")
-        return None
-    return path
+        return []
+    try:
+        return normalize_gltf_paths(selected)
+    except ValueError as error:
+        hou.ui.displayMessage(str(error), title="GLTF Importer")
+        return []
+
+
+def select_gltf_file():
+    """Compatibility helper for callers requesting only one file."""
+    paths = select_gltf_files()
+    return paths[0] if paths else None
 
 
 def get_active_network():
@@ -647,7 +673,7 @@ def create_gltf_network(parent, gltf_path, records, displacement_settings, posit
     }
 
 
-def import_gltf(gltf_path, displacement_settings=None):
+def import_gltf(gltf_path, displacement_settings=None, show_summary=True, target=None):
     if hou is None:
         raise RuntimeError("This script must run inside Houdini.")
     gltf_path = os.path.abspath(os.path.normpath(hou.expandString(gltf_path)))
@@ -663,7 +689,7 @@ def import_gltf(gltf_path, displacement_settings=None):
         "create_disconnected": False,
     }
 
-    target = find_target_context()
+    target = target if target is not None else find_target_context()
     start_position = next_right_position(target)
     if is_obj_network(target):
         model_name = model_name_from_path(gltf_path)
@@ -683,27 +709,68 @@ def import_gltf(gltf_path, displacement_settings=None):
             gltf_path, len(records), result["out"].parent().path()
         )
     )
-    hou.ui.displayMessage(
-        "Imported GLTF model with {0} Octane material(s).".format(len(records)),
-        title="GLTF Importer",
-    )
+    if show_summary:
+        hou.ui.displayMessage(
+            "Imported GLTF model with {0} Octane material(s).".format(len(records)),
+            title="GLTF Importer",
+        )
     return result
 
 
-def run(gltf_path=None, displacement_settings=None):
+def import_gltf_files(gltf_paths, displacement_settings=None):
+    """Import a batch in one context, reporting failures without stopping it."""
     if hou is None:
         raise RuntimeError("This script must run inside Houdini.")
-    gltf_path = gltf_path or select_gltf_file()
-    if not gltf_path:
+    paths = normalize_gltf_paths(gltf_paths)
+    if not paths:
+        return []
+    target = find_target_context()
+    results = []
+    failures = []
+    skipped = 0
+    for path in paths:
+        try:
+            result = import_gltf(
+                path, displacement_settings=displacement_settings,
+                show_summary=False, target=target,
+            )
+        except Exception as error:
+            failures.append("{0}: {1}".format(path, error))
+            _log("Failed to import {0}".format(failures[-1]))
+            continue
+        if result is None:
+            skipped += 1
+        else:
+            results.append(result)
+    message = "Imported {0} of {1} GLTF models with {2} Octane material(s).".format(
+        len(results), len(paths), sum(len(result["materials"]) for result in results)
+    )
+    if skipped:
+        message += "\nSkipped {0} model(s).".format(skipped)
+    if failures:
+        message += "\n\nFailed imports:\n" + "\n".join(failures)
+    hou.ui.displayMessage(message, title="GLTF Importer")
+    return results
+
+
+def run(gltf_path=None, displacement_settings=None, gltf_paths=None):
+    if hou is None:
+        raise RuntimeError("This script must run inside Houdini.")
+    paths = gltf_paths if gltf_paths is not None else gltf_path
+    paths = normalize_gltf_paths(paths) if paths else select_gltf_files()
+    if not paths:
         _log("No GLTF file selected.")
         return None
-    return import_gltf(gltf_path, displacement_settings=displacement_settings)
+    if len(paths) == 1:
+        return import_gltf(paths[0], displacement_settings=displacement_settings)
+    return import_gltf_files(paths, displacement_settings=displacement_settings)
 
 
 def main(kwargs=None):
     kwargs = kwargs or {}
     return run(
         gltf_path=kwargs.get("gltf_path") or kwargs.get("file_path"),
+        gltf_paths=kwargs.get("gltf_paths") or kwargs.get("file_paths"),
         displacement_settings=kwargs.get("displacement_settings") or kwargs.get("height_mode"),
     )
 
