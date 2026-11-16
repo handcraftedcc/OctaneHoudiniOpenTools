@@ -9,6 +9,7 @@
     <memberTool name="Importers"/>
     <memberTool name="cargoOctaneListener"/>
     <memberTool name="displacementManager"/>
+    <memberTool name="octanePurgeVRAM"/>
   </toolshelf>
 
   <tool name="cargoOctaneListener" label="Cargo Listener" icon="hicon:/SVGIcons.index?COMMON_import.svg">
@@ -43,6 +44,22 @@ if selected:
     kwargs["nodes"] = selected
 
 DisplacementManager.main(kwargs)]]></script>
+  </tool>
+
+  <tool name="octanePurgeVRAM" label="Purge VRAM" icon="hicon:/SVGIcons.index?SHELF_clear_texture_cache.svg">
+    <helpText><![CDATA[Free GPU/unified memory held by OctaneRender and Houdini caches, with a before/after memory report.]]></helpText>
+    <script scriptType="python"><![CDATA[import importlib
+import os
+import sys
+
+scripts_path = os.path.join(os.environ.get("OCTANEHOUDINIOPENTOOLS", ""), "scripts", "python")
+if scripts_path and scripts_path not in sys.path:
+    sys.path.append(scripts_path)
+
+import OctanePurgeVRAM
+importlib.reload(OctanePurgeVRAM)
+
+OctanePurgeVRAM.main({})]]></script>
   </tool>
 
   <tool name="Importers" label="Importers" icon="hicon:/SVGIcons.index?BUTTONS_selection_import.svg">
