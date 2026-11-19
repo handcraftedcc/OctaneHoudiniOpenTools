@@ -94,7 +94,7 @@ Engon is not required by the export worker.
 - Grass uses shared diffuse/normal maps with original UVs. Snow, moss, seasonal
   masks and multi-image effects are not rebuilt.
 
-Global and material tabs expose hue, saturation, brightness, roughness and
+Global and material tabs expose hue, saturation, brightness, gamma, roughness and
 specular. Foliage additionally exposes subsurface amount and independent
 subsurface hue/saturation/brightness. Bump strength appears when bump is connected.
 Normal maps connect directly; Octane's bump-height parameter is not presented as

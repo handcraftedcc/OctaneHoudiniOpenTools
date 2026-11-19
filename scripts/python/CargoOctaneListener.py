@@ -504,6 +504,7 @@ def import_received_asset(
         target = hou.node("/mat")
         if target is None:
             target = hou.node("/").createNode("mat")
+        position = CargoImporter.next_right_position(target)
         material = CargoImporter.material_record_from_usd(record, preferred_variants)
         result = CargoImporter.create_octane_material(
             target,
@@ -511,7 +512,7 @@ def import_received_asset(
             height_settings,
             projection_mode,
         )
-        target.layoutChildren()
+        CargoImporter.layout_imported_materials(target, [result], position)
         print("Cargo Octane: created material {0}".format(result.path()))
         return result
 
@@ -527,7 +528,6 @@ def import_received_asset(
         preferred_variants,
         CargoImporter.next_right_position(target, fallback_y=0),
     )
-    target.layoutChildren()
     print("Cargo Octane: imported model {0} in /obj".format(record["name"]))
     return result
 

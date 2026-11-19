@@ -41,6 +41,14 @@ def _input_source(node, words):
     return None
 
 
+def _first_connected_input(node):
+    for index in range(len(node.inputNames())):
+        source = node.input(index)
+        if source is not None:
+            return source
+    return None
+
+
 def _material(name, family, textures=None, parameters=None):
     return {
         "name": name,
@@ -106,6 +114,7 @@ class BotaniqOctaneTests(unittest.TestCase):
         self.assertIsNotNone(subsurface)
         self.assertIsNot(subsurface, base)
         self.assertIn("correction", _label(subsurface))
+        self.assertIn("basecolor_correction", _label(_first_connected_input(subsurface)))
         self.assertIsNone(_input_source(surface, ("bump", "height")))
         self.assertIsNone(_input_source(surface, ("normal",)))
 
@@ -147,6 +156,19 @@ class BotaniqOctaneTests(unittest.TestCase):
         self.assertIn("ch(", target.expression())
         control.set(0.81)
         self.assertAlmostEqual(float(target.eval()), 0.81, places=4)
+
+    def test_base_gamma_control_drives_color_corrector(self):
+        subnet = self._build(_material("gamma_color", "basic"))
+        corrector = next(n for n in _nodes(subnet) if "colorcorrection" in _label(n))
+        control = self.matnet.parm("gamma_color_gamma")
+        global_control = self.matnet.parm("global_gamma")
+        self.assertIsNotNone(control)
+        self.assertIsNotNone(global_control)
+        target = corrector.parm("gamma")
+        self.assertIn("ch(", target.expression())
+        control.set(0.8)
+        global_control.set(1.25)
+        self.assertAlmostEqual(float(target.eval()), 1.0, places=4)
 
 
 if __name__ == "__main__":

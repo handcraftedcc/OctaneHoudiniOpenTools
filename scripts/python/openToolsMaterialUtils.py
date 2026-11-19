@@ -599,10 +599,24 @@ def materialHasEmissionEnabled(material_spec):
         return False
 
 
+def hasAuthoredEmissionColor(material_spec):
+    """Keep explicit emission colors/maps, even when their files are missing."""
+    names = {"emission_color", "emissioncolor", "emissive"}
+    parameters = material_spec.get("parameters") or material_spec.get("inputs") or {}
+    if any(normalizeKey(name) in names for name in parameters):
+        return True
+    channels = list(material_spec.get("authored_texture_channels") or [])
+    channels.extend(texture.get("channel") or "" for texture in
+                    normalizeTextures(material_spec.get("textures", {})))
+    return any(normalizeKey(channel) in names for channel in channels)
+
+
 def connectEmissionColorFallback(standard_surface, material_spec, texture_nodes):
     if standard_surface is None or not materialHasEmissionEnabled(material_spec):
         return
     if "emission_color" in texture_nodes or "emissive" in texture_nodes:
+        return
+    if hasAuthoredEmissionColor(material_spec):
         return
     basecolor_node = texture_nodes.get("base_color") or texture_nodes.get("basecolor")
     if basecolor_node is not None:

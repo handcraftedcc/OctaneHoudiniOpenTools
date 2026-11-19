@@ -78,6 +78,11 @@ paths received from Cargo are converted when assigned to these parameters.
 For nodes created before this fix, reimport the asset or replace backslashes
 with forward slashes in the existing file parameters.
 
+Base color is used as an emission fallback only for materials with positive
+emission strength and no authored emission color or map. An authored constant
+color is preserved, and a missing emission map does not cause base color to be
+substituted. Reimport existing materials to apply this behavior.
+
 Only one plugin can listen on Cargo's configured Houdini port. Disable or
 remove the KitBash3D Solaris/USD Houdini plugin before enabling this package,
 otherwise the second listener will report that the port is already in use.

@@ -26,9 +26,9 @@ focused for the official distribution. Both kinds of contribution are welcome.
 ## Included Tools
 
 The repository includes shared material and settings APIs, import utilities,
-shelf tools, and integrations for Cargo, Megascans, GLTF, USD, PlantFactory, and
-botaniq. The botaniq importer creates Houdini-ready packages from a separately
-licensed local botaniq installation; it does not include botaniq models,
+shelf tools, Images as Planes, and integrations for Cargo, Megascans, GLTF, USD,
+PlantFactory, and botaniq. The botaniq importer creates Houdini-ready packages
+from a separately licensed local botaniq installation; it does not include botaniq models,
 textures, previews, Blender files, or Engon source code.
 
 See the [documentation](docs/README.md) for the available tools and APIs.

@@ -112,6 +112,7 @@ def _ensure_global_controls(matnet):
         hou.FloatParmTemplate("global_hue", "Hue", 1, default_value=(0.0,)),
         hou.FloatParmTemplate("global_saturation", "Saturation", 1, default_value=(1.0,)),
         hou.FloatParmTemplate("global_brightness", "Brightness", 1, default_value=(1.0,)),
+        hou.FloatParmTemplate("global_gamma", "Gamma", 1, default_value=(1.0,)),
         hou.FloatParmTemplate("global_roughness", "Roughness Mult", 1, default_value=(1.0,)),
         hou.FloatParmTemplate("global_specular", "Specular Mult", 1, default_value=(1.0,)),
         hou.FloatParmTemplate("global_subsurface", "Subsurface Mult", 1, default_value=(1.0,)),
@@ -159,7 +160,7 @@ def _promote(matnet, material, surface, base_corrector, subsurface_corrector, st
     role = str(material.get("role") or "basic").lower()
     parameters = material.get("parameters") or {}
     specs = [("hue", "Base Hue", 0.0), ("saturation", "Base Saturation", 1.0),
-             ("brightness", "Base Brightness", 1.0),
+             ("brightness", "Base Brightness", 1.0), ("gamma", "Base Gamma", 1.0),
              ("roughness", "Roughness", float(parameters.get("roughness", 0.5))),
              ("specular", "Specular", float(parameters.get("specular", 0.5)))]
     if role in FOLIAGE_ROLES:
@@ -172,6 +173,7 @@ def _promote(matnet, material, surface, base_corrector, subsurface_corrector, st
     _set_expression(base_corrector, ["hue"], _expression(base_corrector, matnet, controls["hue"], "global_hue"))
     _set_expression(base_corrector, ["saturation"], _expression(base_corrector, matnet, controls["saturation"], "global_saturation", True))
     _set_expression(base_corrector, ["brightness"], _expression(base_corrector, matnet, controls["brightness"], "global_brightness", True))
+    _set_expression(base_corrector, ["gamma"], _expression(base_corrector, matnet, controls["gamma"], "global_gamma", True))
     _set_expression(surface, ["roughness"], _expression(surface, matnet, controls["roughness"], "global_roughness", True))
     _set_expression(surface, ["specular"], _expression(surface, matnet, controls["specular"], "global_specular", True))
     if role in FOLIAGE_ROLES:
@@ -225,7 +227,10 @@ def create_material(matnet, material, folder):
     _connect(surface, base_corrector, ["baseColor"])
     subsurface_corrector = None
     if role in FOLIAGE_ROLES:
-        subsurface_source = images.get("backlight") or base
+        # When no dedicated backlight map exists, the foliage path starts from
+        # the already color-corrected basecolor so hue/saturation/brightness/
+        # gamma adjustments affect both the front and subsurface response.
+        subsurface_source = images.get("backlight") or base_corrector
         subsurface_corrector = _corrector(subnet, subsurface_source, "subsurface_correction")
         _connect(surface, subsurface_corrector, ["subsurfaceColor"])
     strength_kind = None

@@ -441,6 +441,8 @@ def material_record_from_usd(record, preferred_variants):
     material = dict(record)
     material["inputs"] = parse_material_inputs(usd_text)
     material["textures"] = textures
+    # File filtering must not erase the author's intent to use an emission map.
+    material["authored_texture_channels"] = list(variant_textures.get(chosen_variant, {}))
     material["texture_settings"] = {}
     normal_scale = parse_normal_scale(usd_text)
     if normal_scale is not None:
@@ -560,6 +562,20 @@ def next_right_position(parent, fallback_y=0):
         max(right_edges) + NETWORK_INSERT_GAP,
         vertical_center if top_edges else fallback_y,
     )
+
+
+def layout_imported_materials(parent, nodes, position):
+    if len(nodes) > 1:
+        parent.layoutChildren(items=nodes)
+
+    # Anchor the laid-out group by its left edge and vertical midpoint.
+    positions = [node.position() for node in nodes]
+    left = min(point.x() for point in positions)
+    bottom = min(point.y() for point in positions)
+    top = max(point.y() + node_network_size(node)[1] for node, point in zip(nodes, positions))
+    offset = hou.Vector2(position.x() - left, position.y() - (bottom + top) * 0.5)
+    for node, point in zip(nodes, positions):
+        node.setPosition(point + offset)
 
 
 def create_node(parent, type_names, node_name):
@@ -817,6 +833,8 @@ def connect_emission_color_fallback(standard_surface, material, image_nodes):
     if standard_surface is None or not material_has_emission_enabled(material):
         return
     if "emission_color" in image_nodes or "emissive" in image_nodes:
+        return
+    if openToolsMaterialUtils.hasAuthoredEmissionColor(material):
         return
     basecolor_node = image_nodes.get("base_color") or image_nodes.get("basecolor")
     if basecolor_node is not None:
@@ -1244,6 +1262,7 @@ def run_material_import(root_folder, preferred_texture_variants, selected_indice
         projection_mode = choose_projection_mode()
 
     parent = find_target_material_context()
+    position = next_right_position(parent)
     created = []
     for record in selected_records:
         material = material_record_from_usd(record, preferred_texture_variants)
@@ -1251,7 +1270,7 @@ def run_material_import(root_folder, preferred_texture_variants, selected_indice
         created.append(node)
         print("Created {0} from {1} ({2})".format(node.path(), material["path"], material.get("texture_variant")))
 
-    parent.layoutChildren()
+    layout_imported_materials(parent, created, position)
     hou.ui.displayMessage("Created {0} Cargo Octane material(s) in {1}.".format(len(created), parent.path()))
     return created
 

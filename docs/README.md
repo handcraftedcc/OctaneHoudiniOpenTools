@@ -9,6 +9,7 @@ This folder documents shared APIs intended for importer and shelf-tool code.
 - [Cargo Live Import](cargo-live-import.md): receive Cargo assets directly into Octane `/mat` or `/obj` networks.
 - [Megascans Importer](megascans-importer.md): browse and import preview-backed Megascans materials and assets.
 - [GLTF Importer](gltf-importer.md): import flattened GLTF geometry and rebuild its materials for Octane.
+- [Images as Planes](images-as-planes-importer.md): import decal and screen planes with individual or shared UV tile materials.
 - [USD Importer](usd-importer.md): import composed USD/USDZ models or materials with variant selection and native Octane surfaces.
 - [botaniq Importer](botaniq-importer.md): import Blender models and mesh attributes with simple native Octane materials and matnet controls.
 

@@ -17,6 +17,11 @@ except ImportError:
 
 IMPORTERS = [
     {
+        "label": "Images as Planes",
+        "module": "ImagesAsPlanesImporter",
+        "description": "Import images as decal planes with individual or shared Octane materials.",
+    },
+    {
         "label": "botaniq",
         "module": "BotaniqImporter",
         "description": "Import botaniq models with USD attributes and simple native Octane textures/materials.",
