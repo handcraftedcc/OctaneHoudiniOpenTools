@@ -26,7 +26,9 @@ available level. With **Don't load asset**, a record is skipped if its requested
 texture resolution or mesh LOD is unavailable.
 
 Standalone materials are created in the active material network, or `/mat`
-when the active editor is elsewhere. Assets imported from an OBJ network create
+when the active editor is elsewhere. New materials are placed to the right of
+existing nodes; importing never relays out the target material network or moves
+its existing nodes. Assets imported from an OBJ network create
 one geometry object per selected asset, or one per FBX variant when **As
 separate objects** is selected. Assets imported from inside a geometry object
 always keep variants in that object and never run a parent-wide layout.

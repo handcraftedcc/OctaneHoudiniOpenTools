@@ -912,15 +912,18 @@ def import_records(records, preferences):
     if material_records:
         material_context = find_target_material_context()
         for resolved in material_records:
+            # Capture placement before creation so a node's default position
+            # cannot affect insertion. Never relayout the existing network.
+            position = next_right_position(material_context)
             node = create_octane_material(
                 material_context,
                 resolved["record"],
                 resolved["textures"],
                 preferences,
             )
+            node.setPosition(position)
             created.append(node)
             _log("Created material: {0}".format(node.path()))
-        material_context.layoutChildren()
 
     if asset_records:
         asset_context = find_target_asset_context()
