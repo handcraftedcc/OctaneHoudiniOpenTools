@@ -12,6 +12,7 @@ This folder documents shared APIs intended for importer and shelf-tool code.
 - [Images as Planes](images-as-planes-importer.md): import decal and screen planes with individual or shared UV tile materials.
 - [USD Importer](usd-importer.md): import composed USD/USDZ models or materials with variant selection and native Octane surfaces.
 - [botaniq Importer](botaniq-importer.md): import Blender models and mesh attributes with simple native Octane materials and matnet controls.
+- [Purge VRAM](purge-vram.md): release Octane GPU memory and Houdini caches, with a before/after memory report.
 
 ## Design Rule
 
